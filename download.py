@@ -9,7 +9,7 @@ HTTPS = "https"
 ROOT = "/"
 WELLKNOWN = "/.well-known/"
 DEFAULT_HEADER = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.109 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36"
 }
 TIMEOUT = 5
 
@@ -39,8 +39,16 @@ def crawl(website, protocol, path):
         protocol=protocol, website=website, path=path
     )
 
+    if website == "facebook.com":
+        print("yo")
+
     try:
         resp = requests.get(url, headers=DEFAULT_HEADER, timeout=TIMEOUT)
+        if website == "facebook.com":
+            print("hi")
+            print(url)
+            print(resp.status_code)
+            print(resp.headers.get("content-type"))
         if resp.status_code == 200 and (
             resp.headers.get("content-type") is not None
             and "text/plain" in resp.headers.get("content-type")
