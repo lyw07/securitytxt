@@ -313,6 +313,45 @@ def query_contact_email_username(args):
     conn.close()
 
 
+def query_contact_urls(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT domain, contact FROM files WHERE contact != '';")
+    results = cur.fetchall()
+
+    count = 0
+    hackerone = 0
+    openbugbounty = 0
+    for result in results:
+        contacts = result[1].split(",")
+        for contact in contacts:
+            if "http" in contact:
+                count += 1
+                if "hackerone.com" in contact:
+                    hackerone += 1
+                elif "openbugbounty.org" in contact:
+                    openbugbounty += 1
+
+    print(
+        "{}% of domains that have urls as contacts list a hackerone.com URL.\n".format(
+            hackerone / count * 100
+        )
+    )
+
+    print(
+        "{} domains that have urls as contacts list a openbugbounty.org URL.\n".format(
+            openbugbounty
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -334,4 +373,5 @@ if __name__ == "__main__":
     # query_protocol(args)
     # query_contact_and_openbugbounty_use(args)
     # query_contact_categories(args)
-    query_contact_email_username(args)
+    # query_contact_email_username(args)
+    query_contact_urls(args)
