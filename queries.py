@@ -352,6 +352,63 @@ def query_contact_urls(args):
     conn.close()
 
 
+def query_expires_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE expires != '';")
+    expires = cur.fetchone()[0]
+
+    print(
+        "{}% of domains that have a Expires field.\n".format(
+            expires / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
+def query_expires_values(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE expires != '';")
+    total_count = cur.fetchone()[0]
+
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE expires LIKE '%2022%' OR expires LIKE '%2023%';"
+    )
+    good = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE expires LIKE '%2021%';")
+    expired = cur.fetchone()[0]
+
+    print(
+        "{}% of domains that have a Expires field have valid values.\n".format(
+            good / total_count * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Expires field have expired values.\n".format(
+            expired / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -374,4 +431,6 @@ if __name__ == "__main__":
     # query_contact_and_openbugbounty_use(args)
     # query_contact_categories(args)
     # query_contact_email_username(args)
-    query_contact_urls(args)
+    # query_contact_urls(args)
+    # query_expires_use(args)
+    query_expires_values(args)
