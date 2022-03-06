@@ -590,6 +590,73 @@ def query_policy_values(args):
     conn.close()
 
 
+def query_hiring_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE hiring != '';")
+    policy = cur.fetchone()[0]
+
+    print("{}% of domains have a Hiring field.\n".format(policy / total_count * 100))
+
+    cur.close()
+    conn.close()
+
+
+def query_acknowledgments_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE acknowledgments != '' OR other LIKE '%acknowledgement%';"
+    )
+    acknowledgments = cur.fetchone()[0]
+
+    print(
+        "{}% of domains have acknowledgments.\n".format(
+            acknowledgments / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
+def query_canonical_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE canonical != '';")
+    canonicals = cur.fetchone()[0]
+
+    print(
+        "{}% of domains have a Canonical field.\n".format(
+            canonicals / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -620,4 +687,7 @@ if __name__ == "__main__":
     # query_preferred_languages_use(args)
     # query_preferred_languages_values(args)
     # query_policy_use(args)
-    query_policy_values(args)
+    # query_policy_values(args)
+    # query_hiring_use(args)
+    # query_acknowledgments_use(args)
+    query_canonical_use(args)
