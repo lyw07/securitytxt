@@ -91,14 +91,26 @@ def write_to_db(args):
         host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
     )
     cur = conn.cursor()
+    visited = []
     for f in os.listdir("results"):
         if f == ".DS_Store":
             continue
-        values = f.split("-")
+        values = f.split("-", 1)
         protocol = values[0]
-        domain = values[1]
-        path = values[2].split(".txt")[0]
+        vals = values[1].rsplit("-", 1)
+        domain = vals[0]
+        path = vals[1].split(".txt")[0]
         filename = os.path.join("results", f)
+        # If the domain has been parsed, then only need to update the values of
+        # supported protocol and path in the db
+        if domain in visited:
+            cur.execute(
+                "UPDATE files SET {} = true AND {} = true WHERE domain = '{}'".format(
+                    protocol, path, domain
+                ),
+            )
+            continue
+        visited.append(domain)
 
         fields = {
             "contact": "",
@@ -142,11 +154,13 @@ def write_to_db(args):
                         other += content
 
         cur.execute(
-            "INSERT INTO files (domain, protocol, path, contact, openbugbounty, expires, encryption, preferredlanguages, policy, hiring, acknowledgments, canonical, other) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO files (domain, http, https, root, wellknown, contact, openbugbounty, expires, encryption, preferredlanguages, policy, hiring, acknowledgments, canonical, other) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (
                 domain,
-                protocol,
-                path,
+                protocol == "http",
+                protocol == "https",
+                path == "root",
+                path == "wellknown",
                 fields["contact"],
                 fields["openbugbounty"],
                 fields["expires"],
@@ -159,6 +173,7 @@ def write_to_db(args):
                 other,
             ),
         )
+
     conn.commit()
     cur.close()
     conn.close()
