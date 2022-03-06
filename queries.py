@@ -320,14 +320,14 @@ def query_contact_urls(args):
     )
     cur = conn.cursor()
 
-    cur.execute("SELECT domain, contact FROM files WHERE contact != '';")
+    cur.execute("SELECT contact FROM files WHERE contact != '';")
     results = cur.fetchall()
 
     count = 0
     hackerone = 0
     openbugbounty = 0
     for result in results:
-        contacts = result[1].split(",")
+        contacts = result[0].split(",")
         for contact in contacts:
             if "http" in contact:
                 count += 1
