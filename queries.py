@@ -3,7 +3,7 @@ import argparse
 import matplotlib.pyplot as plt
 
 
-def deployment_levels(args):
+def query_deployment_levels(args):
     # create a database connection
     conn = psycopg2.connect(
         host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
@@ -60,6 +60,43 @@ def deployment_levels(args):
     plt.show()
 
 
+def query_url_path(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    # only root path
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM files WHERE root = true AND wellknown = false;")
+    root_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt file only at the root path.\n".format(
+            root_percentage
+        )
+    )
+    # only .well-known path
+    cur.execute("SELECT COUNT(*) FROM files WHERE root = false AND wellknown = true;")
+    wellknown_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt file only at the .well-known path.\n".format(
+            wellknown_percentage
+        )
+    )
+    # both paths
+    cur.execute("SELECT COUNT(*) FROM files WHERE root = true AND wellknown = true;")
+    both_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt file at both the root path and the .well-known path.\n".format(
+            both_percentage
+        )
+    )
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -76,4 +113,6 @@ if __name__ == "__main__":
         "--dbpass", required=True, help="Password to the database connection"
     )
     args = parser.parse_args()
-    deployment_levels(args)
+    query_deployment_levels(args)
+    query_url_path(args)
+    # query_protocol(args)
