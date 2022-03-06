@@ -274,6 +274,45 @@ def query_contact_categories(args):
     conn.close()
 
 
+def query_contact_email_username(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT contact FROM files WHERE contact != '';")
+    results = cur.fetchall()
+
+    emails = 0
+    usernames = {}
+    for result in results:
+        contacts = result[0].split(",")
+        for contact in contacts:
+            if "@" in contact:
+                emails += 1
+                username = contact.split("@")[0]
+                if len(username.split("mailto:")) > 1:
+                    username = username.split("mailto:")[1].strip()
+                if username in usernames:
+                    usernames[username] += 1
+                else:
+                    usernames[username] = 1
+
+    sorted_usernames = dict(
+        sorted(usernames.items(), key=lambda item: item[1], reverse=True)
+    )
+    for username in sorted_usernames.keys():
+        print(
+            "{}% of domains that have email contacts have {}@ username.\n".format(
+                usernames[username] / emails * 100, username
+            )
+        )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -294,4 +333,5 @@ if __name__ == "__main__":
     # query_url_path(args)
     # query_protocol(args)
     # query_contact_and_openbugbounty_use(args)
-    query_contact_categories(args)
+    # query_contact_categories(args)
+    query_contact_email_username(args)
