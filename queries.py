@@ -134,6 +134,78 @@ def query_protocol(args):
     conn.close()
 
 
+def query_contact_and_openbugbounty_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+    # single contact
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE contact != '' AND contact NOT LIKE '%,%';"
+    )
+    single_contact_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have a single contact field only in the security.txt files.\n".format(
+            single_contact_percentage
+        )
+    )
+
+    # two or more contacts
+    cur.execute("SELECT COUNT(*) FROM files WHERE contact LIKE '%,%';")
+    two_plus_contact_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have two or more contacts in the security.txt files.\n".format(
+            two_plus_contact_percentage
+        )
+    )
+
+    # no contacts
+    cur.execute("SELECT COUNT(*) FROM files WHERE contact = '';")
+    no_contact_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have no contacts in the security.txt files.\n".format(
+            no_contact_percentage
+        )
+    )
+
+    # only openbugbounty
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE contact = '' AND openbugbounty != '';"
+    )
+    openbugbounty_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have openbugbounty field only in the security.txt files.\n".format(
+            openbugbounty_percentage
+        )
+    )
+
+    # both contact and openbugbounty
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE contact != '' AND openbugbounty != '';"
+    )
+    both_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have both contact and openbugbounty fields in the security.txt files.\n".format(
+            both_percentage
+        )
+    )
+
+    # nothing
+    cur.execute("SELECT COUNT(*) FROM files WHERE contact = '' AND openbugbounty = '';")
+    nothing_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have no structured contacts in the security.txt files.\n".format(
+            nothing_percentage
+        )
+    )
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -150,6 +222,7 @@ if __name__ == "__main__":
         "--dbpass", required=True, help="Password to the database connection"
     )
     args = parser.parse_args()
-    query_deployment_levels(args)
-    query_url_path(args)
-    query_protocol(args)
+    # query_deployment_levels(args)
+    # query_url_path(args)
+    # query_protocol(args)
+    query_contact_and_openbugbounty_use(args)
