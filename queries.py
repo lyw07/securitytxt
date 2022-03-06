@@ -1,3 +1,4 @@
+import re
 import psycopg2
 import argparse
 import matplotlib.pyplot as plt
@@ -206,6 +207,73 @@ def query_contact_and_openbugbounty_use(args):
     conn.close()
 
 
+def query_contact_categories(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT contact FROM files WHERE contact != '';")
+    results = cur.fetchall()
+    total_count = len(results)
+
+    emails = 0
+    urls = 0
+    telephones = 0
+    others = 0
+    both_email_and_url = 0
+    for result in results:
+        contacts = result[0].split(",")
+        email = False
+        url = False
+        telephone = False
+        other = False
+        for contact in contacts:
+            if "@" in contact:
+                email = True
+            elif "http" in contact:
+                url = True
+            elif re.search("[+][1-9]+", contact):
+                telephone = True
+            else:
+                other = True
+
+        if email:
+            emails += 1
+        if url:
+            urls += 1
+        if telephone:
+            telephones += 1
+        if other:
+            others += 1
+        if email and url:
+            both_email_and_url += 1
+
+    print(
+        "{}% of domains have emails as contacts.\n".format(emails / total_count * 100)
+    )
+    print("{}% of domains have urls as contacts.\n".format(urls / total_count * 100))
+    print(
+        "{}% of domains have both emails and urls as contacts.\n".format(
+            both_email_and_url / total_count * 100
+        )
+    )
+    print(
+        "{}% of domains have telephone numbers as contacts.\n".format(
+            telephones / total_count * 100
+        )
+    )
+    print(
+        "{}% of domains have other values as contacts.\n".format(
+            others / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -225,4 +293,5 @@ if __name__ == "__main__":
     # query_deployment_levels(args)
     # query_url_path(args)
     # query_protocol(args)
-    query_contact_and_openbugbounty_use(args)
+    # query_contact_and_openbugbounty_use(args)
+    query_contact_categories(args)
