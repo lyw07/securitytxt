@@ -97,6 +97,43 @@ def query_url_path(args):
     conn.close()
 
 
+def query_protocol(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    # only http
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM files WHERE http = true AND https = false;")
+    http_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt files only accessible over HTTP.\n".format(
+            http_percentage
+        )
+    )
+    # only https
+    cur.execute("SELECT COUNT(*) FROM files WHERE http = false AND https = true;")
+    https_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt files only accessible over HTTPS.\n".format(
+            https_percentage
+        )
+    )
+    # both protocols
+    cur.execute("SELECT COUNT(*) FROM files WHERE http = true AND https = true;")
+    both_percentage = cur.fetchone()[0] / total_count * 100
+    print(
+        "{}% of domains have security.txt files accessible over both protocols.\n".format(
+            both_percentage
+        )
+    )
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -115,4 +152,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     query_deployment_levels(args)
     query_url_path(args)
-    # query_protocol(args)
+    query_protocol(args)
