@@ -409,6 +409,74 @@ def query_expires_values(args):
     conn.close()
 
 
+def query_encryption_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption != '';")
+    encryption = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE other LIKE '%signature%';")
+    signature = cur.fetchone()[0]
+
+    print(
+        "{}% of domains have a Encryption field.\n".format(
+            encryption / total_count * 100
+        )
+    )
+
+    print(
+        "{}% of domains have signed the security.txt file.\n".format(
+            signature / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
+def query_encryption_values(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption != '';")
+    encryption = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%https://%';")
+    urls = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%openpgp4fpr%';")
+    openpgp4fpr = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%dns%';")
+    dns = cur.fetchone()[0]
+
+    print(
+        "{}% of domains that have a Encryption field use URLs.\n".format(
+            urls / encryption * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Encryption field use openpgp4fpr URIs.\n".format(
+            openpgp4fpr / encryption * 100
+        )
+    )
+
+    print("{} domains that have a Encryption field use DNS records.\n".format(dns))
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -433,4 +501,6 @@ if __name__ == "__main__":
     # query_contact_email_username(args)
     # query_contact_urls(args)
     # query_expires_use(args)
-    query_expires_values(args)
+    # query_expires_values(args)
+    # query_encryption_use(args)
+    query_encryption_values(args)
