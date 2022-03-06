@@ -105,7 +105,7 @@ def write_to_db(args):
         # supported protocol and path in the db
         if domain in visited:
             cur.execute(
-                "UPDATE files SET {} = true AND {} = true WHERE domain = '{}'".format(
+                "UPDATE files SET {} = true, {} = true WHERE domain = '{}'".format(
                     protocol, path, domain
                 ),
             )
