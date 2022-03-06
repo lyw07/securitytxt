@@ -39,16 +39,8 @@ def crawl(website, protocol, path):
         protocol=protocol, website=website, path=path
     )
 
-    if website == "facebook.com":
-        print("yo")
-
     try:
         resp = requests.get(url, headers=DEFAULT_HEADER, timeout=TIMEOUT)
-        if website == "facebook.com":
-            print("hi")
-            print(url)
-            print(resp.status_code)
-            print(resp.headers.get("content-type"))
         if resp.status_code == 200 and (
             resp.headers.get("content-type") is not None
             and "text/plain" in resp.headers.get("content-type")
