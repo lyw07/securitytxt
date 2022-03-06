@@ -532,6 +532,64 @@ def query_preferred_languages_values(args):
     conn.close()
 
 
+def query_policy_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE policy != '';")
+    policy = cur.fetchone()[0]
+
+    print("{}% of domains have a Policy field.\n".format(policy / total_count * 100))
+
+    cur.close()
+    conn.close()
+
+
+def query_policy_values(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE policy != '';")
+    policy = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE policy LIKE '%https://%';")
+    webpages = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE policy LIKE '%hackerone.com%';")
+    hackerone = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE policy LIKE '%bugcrowd.com%';")
+    bugcrowd = cur.fetchone()[0]
+
+    print(
+        "{}% of domains that have a Policy field use a webpage.\n".format(
+            webpages / policy * 100
+        )
+    )
+    print(
+        "{}% of domains that have a Policy field use a hackerone.com page.\n".format(
+            hackerone / policy * 100
+        )
+    )
+    print(
+        "{}% of domains that have a Policy field use a bugcrowd.com page.\n".format(
+            bugcrowd / policy * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -560,4 +618,6 @@ if __name__ == "__main__":
     # query_encryption_use(args)
     # query_encryption_values(args)
     # query_preferred_languages_use(args)
-    query_preferred_languages_values(args)
+    # query_preferred_languages_values(args)
+    # query_policy_use(args)
+    query_policy_values(args)
