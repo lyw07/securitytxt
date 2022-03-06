@@ -477,6 +477,61 @@ def query_encryption_values(args):
     conn.close()
 
 
+def query_preferred_languages_use(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM files;")
+    total_count = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM files WHERE preferredlanguages != '';")
+    languages = cur.fetchone()[0]
+
+    print(
+        "{}% of domains have a Preferred-Languages field.\n".format(
+            languages / total_count * 100
+        )
+    )
+
+    cur.close()
+    conn.close()
+
+
+def query_preferred_languages_values(args):
+    # create a database connection
+    conn = psycopg2.connect(
+        host="localhost", database=args.dbname, user=args.dbuser, password=args.dbpass
+    )
+    cur = conn.cursor()
+
+    cur.execute("SELECT preferredlanguages FROM files WHERE preferredlanguages != '';")
+    results = cur.fetchall()
+
+    values = {}
+    for result in results:
+        languages = result[0].split(",")
+        for language in languages:
+            language = language.strip()
+            if language in values:
+                values[language] += 1
+            else:
+                values[language] = 1
+
+    sorted_values = dict(sorted(values.items(), key=lambda item: item[1], reverse=True))
+    for language in sorted_values.keys():
+        print(
+            "{}% of domains that have a Preferred-Language field lists {}.\n".format(
+                sorted_values[language] / len(results) * 100, language
+            )
+        )
+
+    cur.close()
+    conn.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Query security.txt file content from the database"
@@ -503,4 +558,6 @@ if __name__ == "__main__":
     # query_expires_use(args)
     # query_expires_values(args)
     # query_encryption_use(args)
-    query_encryption_values(args)
+    # query_encryption_values(args)
+    # query_preferred_languages_use(args)
+    query_preferred_languages_values(args)
