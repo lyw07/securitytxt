@@ -157,39 +157,6 @@ def plot_expires_use():
     plt.show()
 
 
-def plot_expires_values():
-    old_results = [83, 17, 0]
-    new_results = [69, 27.2, 3.8]
-    x = [0, 1]
-    xticks = ["2021-05", "2022-03"]
-    combined = list(zip(old_results, new_results))
-    y1 = list(combined[0])
-    y2 = list(combined[1])
-    y3 = list(combined[2])
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.plot(x, y1, color="royalblue", marker=".", label="Valid Expiration Date")
-    for i, v in enumerate(y1):
-        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
-    plt.plot(
-        x,
-        y2,
-        color="darkorange",
-        marker="^",
-        label="Abnormally Distant Expiration Date",
-    )
-    for i, v in enumerate(y2):
-        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
-    plt.plot(x, y3, color="g", marker="*", label="Expired Date")
-    for i, v in enumerate(y3):
-        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
-    plt.xticks(x, xticks)
-    plt.xlabel("Date")
-    plt.ylabel("% of Websites Having a Form of Expiration Date in security.txt")
-    plt.legend()
-    plt.show()
-
-
 def plot_preferred_languages_use():
     old_results = [24]
     new_results = [38]

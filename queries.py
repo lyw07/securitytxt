@@ -1,6 +1,10 @@
 import re
 import psycopg2
 import argparse
+from datetime import datetime
+from dateutil.parser import parse as parse_dt
+from dateutil.relativedelta import *
+from dateutil.tz import UTC
 
 
 def query_deployment_levels(args):
@@ -352,26 +356,51 @@ def query_expires_values(args):
     )
     cur = conn.cursor()
 
-    cur.execute("SELECT COUNT(*) FROM files WHERE expires != '';")
-    total_count = cur.fetchone()[0]
+    cur.execute("SELECT expires FROM files WHERE expires != '';")
+    datetimes = cur.fetchall()
+    total_count = len(datetimes)
 
-    cur.execute(
-        "SELECT COUNT(*) FROM files WHERE expires LIKE '%2022%' OR expires LIKE '%2023%';"
-    )
-    good = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM files WHERE expires LIKE '%2021%';")
-    expired = cur.fetchone()[0]
-
-    print(
-        "{}% of domains that have a Expires field have valid values.\n".format(
-            good / total_count * 100
-        )
-    )
+    dt_now = datetime.now().astimezone(UTC)
+    dt_furthest = dt_now + relativedelta(years=+1)
+    expired = 0
+    valid = 0
+    toofar = 0
+    invalid = 0
+    for dt in datetimes:
+        try:
+            dt_str = parse_dt(dt[0])
+            if dt_str < dt_now:
+                # expired
+                expired += 1
+            elif dt_str < dt_furthest:
+                valid += 1
+            else:
+                toofar += 1
+        except ValueError:
+            invalid += 1
+            print("Invalid date time {}\n".format(dt[0]))
 
     print(
         "{}% of domains that have a Expires field have expired values.\n".format(
             expired / total_count * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Expires field have valid values.\n".format(
+            valid / total_count * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Expires field have values further than one year from now.\n".format(
+            toofar / total_count * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Expires field have invalid values.\n".format(
+            invalid / total_count * 100
         )
     )
 
