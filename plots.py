@@ -43,7 +43,7 @@ def plot_url_path():
     y3 = list(combined[2])
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    plt.plot(x, y1, color="royalblue", marker=".", label=".well-known Only")
+    plt.plot(x, y1, color="royalblue", marker=".", label="/.well-known/ Only")
     for i, v in enumerate(y1):
         ax.text(i, v + 0.4, "%.1f" % v, ha="center")
     plt.plot(x, y2, color="darkorange", marker="^", label="Root Only")
@@ -88,56 +88,6 @@ def plot_protocol():
     plt.show()
 
 
-def plot_contact_and_openbugbounty_use():
-    old_results = [6.4, 5.6, 1, 87]
-    new_results = [6.6, 7.7, 1.3, 84.4]
-    x = [0, 1]
-    xticks = ["2021-05", "2022-03"]
-    combined = list(zip(old_results, new_results))
-    y1 = list(combined[0])
-    y2 = list(combined[1])
-    y3 = list(combined[2])
-    y4 = list(combined[3])
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.plot(x, y1, color="royalblue", marker=".", label="OpenBugBounty Only")
-    plt.plot(x, y2, color="darkorange", marker="^", label="OpenBugBounty and Contact")
-    plt.plot(x, y3, color="g", marker="*", label="No Structured Contact")
-    plt.plot(x, y4, color="r", marker="d", label="Contact Only")
-    for i, v in enumerate(y4):
-        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
-    plt.xticks(x, xticks)
-    plt.xlabel("Date")
-    plt.ylabel("% of Websites Having a Form of Contact in security.txt")
-    plt.legend()
-    plt.show()
-
-
-def plot_contact_categories():
-    old_results = [49, 49, 8, 1]
-    new_results = [87, 32, 20, 0.7]
-    x = [0, 1]
-    xticks = ["2021-05", "2022-03"]
-    combined = list(zip(old_results, new_results))
-    y1 = list(combined[0])
-    y2 = list(combined[1])
-    y3 = list(combined[2])
-    y4 = list(combined[3])
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.plot(x, y1, color="royalblue", marker=".", label="Emails")
-    for i, v in enumerate(y1):
-        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
-    plt.plot(x, y2, color="darkorange", marker="^", label="URLs")
-    plt.plot(x, y3, color="g", marker="*", label="Email and URL")
-    plt.plot(x, y4, color="r", marker="d", label="Telephone Number")
-    plt.xticks(x, xticks)
-    plt.xlabel("Date")
-    plt.ylabel("% of Websites Having a Specific Type of Contact Field in security.txt")
-    plt.legend()
-    plt.show()
-
-
 def plot_expires_use():
     old_results = [1.7]
     new_results = [21]
@@ -157,6 +107,64 @@ def plot_expires_use():
     plt.show()
 
 
+def plot_encryption_use():
+    old_results = [21, 2.5]
+    new_results = [39, 14]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    y2 = list(combined[1])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".", label="Has an Encryption Field")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+    plt.plot(
+        x,
+        y2,
+        color="darkorange",
+        marker="^",
+        label="Sign the File with an OpenPGP signature",
+    )
+    for i, v in enumerate(y2):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Using Encryption and Signatures")
+    plt.legend()
+    plt.show()
+
+
+def plot_encryption_values():
+    old_results = [91, 4, 0]
+    new_results = [97, 2, 0.1]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    y2 = list(combined[1])
+    y3 = list(combined[2])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".", label="Web URI")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+    plt.plot(x, y2, color="darkorange", marker="^", label="OpenPGP Fingerprint")
+    for i, v in enumerate(y2):
+        ax.text(i, v + 1.0, "%.1f" % v, ha="center")
+    plt.plot(x, y3, color="g", marker="*", label="OPENPGPKEY DNS record")
+    for i, v in enumerate(y3):
+        ax.text(i, v - 1.0, "%.1f" % v, ha="center")
+
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Using A Form of Encryption Key")
+    plt.legend()
+    plt.show()
+
+
 def plot_preferred_languages_use():
     old_results = [24]
     new_results = [38]
@@ -171,8 +179,83 @@ def plot_preferred_languages_use():
         ax.text(i, v + 0.4, "%.1f" % v, ha="center")
     plt.xticks(x, xticks)
     plt.xlabel("Date")
-    plt.ylabel("% of Websites Having an Preferred-Language Field in security.txt")
+    plt.ylabel("% of Websites Having a Preferred-Language Field in security.txt")
     plt.ylim([20, 40])
+    plt.show()
+
+
+def plot_policy_use():
+    old_results = [50]
+    new_results = [44]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Having a Policy Field in security.txt")
+    plt.ylim([40, 55])
+    plt.show()
+
+
+def plot_hiring_use():
+    old_results = [25]
+    new_results = [34]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Having a Hiring Field in security.txt")
+    plt.ylim([20, 35])
+    plt.show()
+
+
+def plot_acknowledgments_use():
+    old_results = [9]
+    new_results = [31]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.4, "%.1f" % v, ha="center")
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Having a Acknowledgments Field in security.txt")
+    plt.show()
+
+
+def plot_canonical_use():
+    old_results = [16]
+    new_results = [20]
+    x = [0, 1]
+    xticks = ["2021-05", "2022-03"]
+    combined = list(zip(old_results, new_results))
+    y1 = list(combined[0])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.plot(x, y1, color="royalblue", marker=".")
+    for i, v in enumerate(y1):
+        ax.text(i, v + 0.2, "%.1f" % v, ha="center")
+    plt.xticks(x, xticks)
+    plt.xlabel("Date")
+    plt.ylabel("% of Websites Having a Canonical Field in security.txt")
+    plt.ylim([15, 21])
     plt.show()
 
 
@@ -180,8 +263,11 @@ if __name__ == "__main__":
     plot_deployment_levels()
     plot_url_path()
     plot_protocol()
-    plot_contact_and_openbugbounty_use()
-    plot_contact_categories()
     plot_expires_use()
-    plot_expires_values()
+    plot_encryption_use()
+    plot_encryption_values()
     plot_preferred_languages_use()
+    plot_policy_use()
+    plot_hiring_use()
+    plot_acknowledgments_use()
+    plot_canonical_use()

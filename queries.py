@@ -421,7 +421,9 @@ def query_encryption_use(args):
     cur.execute("SELECT COUNT(*) FROM files WHERE encryption != '';")
     encryption = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM files WHERE other LIKE '%signature%';")
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE other LIKE '%signature%' or encryption LIKE '%public key block%';"
+    )
     signature = cur.fetchone()[0]
 
     print(
@@ -450,8 +452,13 @@ def query_encryption_values(args):
     cur.execute("SELECT COUNT(*) FROM files WHERE encryption != '';")
     encryption = cur.fetchone()[0]
 
-    cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%https://%';")
+    cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%http%';")
     urls = cur.fetchone()[0]
+
+    cur.execute(
+        "SELECT COUNT(*) FROM files WHERE encryption LIKE '%http%' AND encryption not like '%https%';"
+    )
+    http_urls = cur.fetchone()[0]
 
     cur.execute("SELECT COUNT(*) FROM files WHERE encryption LIKE '%openpgp4fpr%';")
     openpgp4fpr = cur.fetchone()[0]
@@ -472,6 +479,17 @@ def query_encryption_values(args):
     )
 
     print("{} domains that have a Encryption field use DNS records.\n".format(dns))
+    print(
+        "{}% of domains that have a Encryption field use DNS records.\n".format(
+            dns / encryption * 100
+        )
+    )
+
+    print(
+        "{}% of domains that have a Encryption field use http URLs.\n".format(
+            http_urls / encryption * 100
+        )
+    )
     cur.close()
     conn.close()
 
